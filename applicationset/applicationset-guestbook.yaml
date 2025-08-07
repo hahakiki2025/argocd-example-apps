@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-test
+  namespace: new-argocd-ns
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - list:
+      elements:
+      - cluster: argocd-wc-1
+        url: https://192.168.116.1:6443
+        x: 1
+      - cluster: argocd-wc-1
+        url: https://192.168.116.1:6443
+        x: 2
+      - cluster: argocd-wc-2
+        url: https://192.168.120.1:6443
+        x: 1
+      - cluster: argocd-wc-2
+        url: https://192.168.120.1:6443
+        x: 2
+  template:
+    metadata:
+      name: '{{.cluster}}-guestbook-{{.x}}'
+    spec:
+      project: default 
+      source:
+        repoURL: git@github.com:hahakiki2025/argocd-example-apps.git 
+        targetRevision: master 
+        path: guestbook
+      destination:
+        server: '{{.url}}'
+        namespace: 'app-test-{{.x}}'
